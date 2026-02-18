@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const bcrypt = require("bcryptjs");
 
 module.exports = {
   async register(req, res) {
@@ -26,11 +27,40 @@ module.exports = {
       return res.status(201).json({
         message: "Usuário cadastrado!",
         user,
+        agent: req.headers["user-agent"],
       });
     } catch (e) {
       return res
-        .status(400)
+        .status(500)
         .json({ error: `Falha ao registrar: ${e.message}` });
+    }
+  },
+
+  // LOGIN
+  async login(req, res) {
+    const { email, password } = req.body;
+
+    try {
+      const user = await User.findOne({ email }).select("+password");
+
+      if (!user) {
+        return res.status(400).json({ error: "Usuário nao encontrado" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        return res.status(400).json({ error: "Senha invalida." });
+      }
+
+      user.password = undefined;
+
+      return res.status(200).json({
+        message: "Login realizado com sucesso.",
+        user,
+      });
+    } catch (e) {
+      return res.status(500).json({ error: `Erro no servidor: ${e.message}` });
     }
   },
 };
