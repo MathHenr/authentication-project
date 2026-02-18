@@ -21,6 +21,14 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+  loginAttempts: {
+    type: Number,
+    default: 0,
+  },
+  lockUntil: {
+    type: Date,
+  },
+  knowIps: [String],
 });
 
 // Criar um hook para ter certeza de salvar senha como hash
