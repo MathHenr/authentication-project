@@ -1,5 +1,12 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+function generateToken(param = {}) {
+  return jwt.sign(param, process.env.APP_SECRET, {
+    expiresIn: 86400,
+  });
+}
 
 module.exports = {
   async register(req, res) {
@@ -28,6 +35,7 @@ module.exports = {
         message: "Usuário cadastrado!",
         user,
         agent: req.headers["user-agent"],
+        token: generateToken({ id: user.id }),
       });
     } catch (e) {
       return res
@@ -58,6 +66,7 @@ module.exports = {
       return res.status(200).json({
         message: "Login realizado com sucesso.",
         user,
+        token: generateToken({ id: user.id }),
       });
     } catch (e) {
       return res.status(500).json({ error: `Erro no servidor: ${e.message}` });
