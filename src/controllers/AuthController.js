@@ -14,12 +14,14 @@ module.exports = {
         req.ip || req.header["x-forwarded-for"] || req.socket.remoteAddress;
 
       // criação do usuário
-      const user = User.create({
+      const user = await User.create({
         name,
         email,
         password,
         lastIp: userIp,
       });
+
+      user.password = undefined;
 
       return res.status(201).json({
         message: "Usuário cadastrado!",

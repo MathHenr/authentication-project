@@ -1,7 +1,7 @@
-const mongosose = require("mongoose");
+const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const Userschema = new mongosose.Schema({
+const UserSchema = new mongoose.Schema({
   name: {
     type: String,
   },
@@ -24,13 +24,15 @@ const Userschema = new mongosose.Schema({
 });
 
 // Criar um hook para ter certeza de salvar senha como hash
-Userschema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+UserSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
 
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-
-  next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  } catch (e) {
+    throw e;
+  }
 });
 
-module.exports = mongoose.model("User", Userschema);
+module.exports = mongoose.model("User", UserSchema);
